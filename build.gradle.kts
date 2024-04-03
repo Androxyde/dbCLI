@@ -1,7 +1,8 @@
 plugins {
     id("groovy") 
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.2.0"
+    id("io.micronaut.application") version "4.3.5"
+    id("io.micronaut.aot") version "4.3.5"
 }
 
 version = "0.1"
@@ -11,14 +12,43 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    this.getByName("main"){
+        this.java.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\main\\java")
+        this.resources.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\main\\resources")
+    }
+    this.getByName("test"){
+        this.java.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\java")
+        this.groovy.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\groovy")
+        this.resources.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\resources")
+    }
+}
+
 dependencies {
+
     annotationProcessor("info.picocli:picocli-codegen")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
-    implementation("info.picocli:picocli")
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
+    compileOnly("io.micronaut:micronaut-http-client")
+    compileOnly("org.projectlombok:lombok:1.18.30")
+
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
-    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
+
+    implementation("info.picocli:picocli")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+
+    implementation("com.fasterxml.uuid:java-uuid-generator:5.0.0")
+    implementation("ch.qos.logback:logback-core:1.5.3")
+
+    implementation("ch.qos.logback:logback-classic:1.5.3")
+    runtimeOnly("org.slf4j:slf4j-ext:2.0.12")
     runtimeOnly("org.yaml:snakeyaml")
+
 }
 
 application {
