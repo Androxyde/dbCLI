@@ -29,10 +29,10 @@ dependencies {
     annotationProcessor("info.picocli:picocli-codegen")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
     annotationProcessor("io.micronaut:micronaut-http-validation")
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
 
     compileOnly("io.micronaut:micronaut-http-client")
-    compileOnly("org.projectlombok:lombok:1.18.30")
+    compileOnly("org.projectlombok:lombok:1.18.31")
 
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
@@ -62,6 +62,8 @@ java {
 
 tasks.withType<Jar> {
     // Otherwise you'll get a "No main manifest attribute" error
+    exclude("application*yml")
+
     manifest {
         attributes["Main-Class"] = "org.androxyde.Main"
         attributes["Premain-Class"] = "org.androxyde.Agent"
