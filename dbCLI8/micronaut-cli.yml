@@ -1,0 +1,6 @@
+applicationType: cli
+defaultPackage: org.androxyde
+testFramework: spock
+sourceLanguage: java
+buildTool: gradle_kotlin
+features: [app-name, gradle, http-client-test, java, logback, micronaut-build, picocli, picocli-java-application, picocli-spock, properties, readme, serialization-jackson, shade, spock]

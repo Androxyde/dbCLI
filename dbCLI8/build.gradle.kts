@@ -1,8 +1,7 @@
 plugins {
     id("groovy") 
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.3.5"
-    id("io.micronaut.aot") version "4.3.5"
+    id("io.micronaut.application") version "3.7.10"
 }
 
 version = "0.1"
@@ -26,28 +25,18 @@ sourceSets {
 
 dependencies {
 
-    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("info.picocli:picocli-codegen:4.7.5")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
 
-    compileOnly("io.micronaut:micronaut-http-client")
-    compileOnly("org.projectlombok:lombok:1.18.31")
-
+    implementation("info.picocli:picocli:4.7.5")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
-    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
+    implementation("net.bytebuddy:byte-buddy:1.14.13")
 
-    implementation("info.picocli:picocli")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
-
-    implementation("com.fasterxml.uuid:java-uuid-generator:5.0.0")
-    implementation("ch.qos.logback:logback-core:1.5.3")
-
-    implementation("ch.qos.logback:logback-classic:1.5.3")
-    runtimeOnly("org.slf4j:slf4j-ext:2.0.12")
-    runtimeOnly("org.yaml:snakeyaml")
+    runtimeOnly("ch.qos.logback:logback-classic:1.4.14")
+    runtimeOnly("org.slf4j:slf4j-api:2.0.12")
+    runtimeOnly("org.yaml:snakeyaml:2.2")
 
 }
 
@@ -56,14 +45,12 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.toVersion("1.8")
+    targetCompatibility = JavaVersion.toVersion("1.8")
 }
 
 tasks.withType<Jar> {
     // Otherwise you'll get a "No main manifest attribute" error
-    exclude("application*yml")
-
     manifest {
         attributes["Main-Class"] = "org.androxyde.Main"
         attributes["Premain-Class"] = "org.androxyde.Agent"
@@ -83,7 +70,7 @@ tasks.withType<Jar> {
 }
 
 micronaut {
-    testRuntime("spock2")
+    testRuntime("JUnit")
     processing {
         incremental(true)
         annotations("org.androxyde.*")
