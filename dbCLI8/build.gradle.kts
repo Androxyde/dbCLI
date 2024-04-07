@@ -1,7 +1,7 @@
 plugins {
-    id("groovy") 
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.micronaut.application") version "3.7.10"
+    id("io.micronaut.aot") version "3.7.10"
 }
 
 version = "0.1"
@@ -13,13 +13,12 @@ repositories {
 
 sourceSets {
     this.getByName("main"){
-        this.java.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\main\\java")
-        this.resources.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\main\\resources")
+        this.java.srcDir("../src/main/java")
+        this.resources.srcDir("../src/main/resources")
     }
     this.getByName("test"){
-        this.java.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\java")
-        this.groovy.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\groovy")
-        this.resources.srcDir("C:\\Users\\eodille\\git\\dbCLI_sources\\src\\test\\resources")
+        this.java.srcDir("../src/test/java")
+        this.resources.srcDir("../src/test/resources")
     }
 }
 
@@ -27,16 +26,26 @@ dependencies {
 
     annotationProcessor("info.picocli:picocli-codegen:4.7.5")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
 
-    implementation("info.picocli:picocli:4.7.5")
+    compileOnly("io.micronaut:micronaut-http-client")
+    compileOnly("org.projectlombok:lombok:1.18.32")
+
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    implementation("net.bytebuddy:byte-buddy:1.14.13")
+    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
 
-    runtimeOnly("ch.qos.logback:logback-classic:1.4.14")
-    runtimeOnly("org.slf4j:slf4j-api:2.0.12")
-    runtimeOnly("org.yaml:snakeyaml:2.2")
+    implementation("info.picocli:picocli:4.7.5")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.0")
+
+    implementation("com.fasterxml.uuid:java-uuid-generator:5.0.0")
+    implementation("ch.qos.logback:logback-core:1.3.14")
+
+    implementation("ch.qos.logback:logback-classic:1.3.14")
+    runtimeOnly("org.slf4j:slf4j-ext:2.0.12")
+    runtimeOnly("org.yaml:snakeyaml")
 
 }
 
@@ -57,16 +66,6 @@ tasks.withType<Jar> {
         attributes["Launcher-Agent-Class"] = "org.androxyde.Agent"
     }
 
-    // To avoid the duplicate handling strategy error
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    // To add all of the dependencies otherwise a "NoClassDefFoundError" error
-    from(sourceSets.main.get().output)
-
-    dependsOn(configurations.runtimeClasspath)
-    from({
-        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-    })
 }
 
 micronaut {
