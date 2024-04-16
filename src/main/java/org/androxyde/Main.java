@@ -116,17 +116,15 @@ public class Main {
 		try {
         	for (File folder:folders) {
 
-        		Integer javaVersion = getJavaVersion();
-        		
         		// search best jdbc driver
-        			if (javaVersion>10)
+        			if (Agent.getJavaVersion()>10)
                 		for (File jar:folder.listFiles(new JarFilter("^.*(jdbc11\\.).*jar$"))) {
                 			if (!Agent.contains(jar)) {
                 				Agent.addToClassPath(jar);
                 			}
                 		}
         			else {
-            			if (javaVersion>9)
+            			if (Agent.getJavaVersion()>9)
                     		for (File jar:folder.listFiles(new JarFilter("^.*(jdbc10\\.).*jar$"))) {
                     			if (!Agent.contains(jar)) {
                     				Agent.addToClassPath(jar);
@@ -141,7 +139,7 @@ public class Main {
             			}
         			}
 
-        			if (javaVersion>10)
+        			if (Agent.getJavaVersion()>10)
                 		for (File jar:folder.listFiles(new JarFilter("^.*(ucp11\\.).*jar$"))) {
                 			if (!Agent.contains(jar)) {
                 				Agent.addToClassPath(jar);
@@ -160,27 +158,6 @@ public class Main {
 			e.printStackTrace();;
 		}
 		
-	}
-
-	/**
-	 * Returns the Java version as an int value.
-	 * @return the Java version as an int value (8, 9, etc.)
-	 * @since 12130
-	 */
-	public static int getJavaVersion() {
-	    String version = System.getProperty("java.version");
-	    if (version.startsWith("1.")) {
-	        version = version.substring(2);
-	    }
-	    // Allow these formats:
-	    // 1.8.0_72-ea
-	    // 9-ea
-	    // 9
-	    // 9.0.1
-	    int dotPos = version.indexOf('.');
-	    int dashPos = version.indexOf('-');
-	    return Integer.parseInt(version.substring(0,
-	            dotPos > -1 ? dotPos : dashPos > -1 ? dashPos : 1));
 	}
 
 	public static void main(String[] args) {

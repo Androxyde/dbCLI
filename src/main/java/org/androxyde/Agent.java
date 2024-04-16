@@ -1,5 +1,7 @@
 package org.androxyde;
 
+import org.androxyde.config.GlobalConfig;
+
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -19,28 +21,52 @@ import java.lang.reflect.Method;
 
 public class Agent {
 
-	public final static String version = "dbCLI Agent release 1.0 "+ System.getProperty("java.vm.vendor");
 	private static Instrumentation inst = null;
 
 	private static String rootFolder=null;
 
+	private static Integer javaVersion=null;
+
 	private static Set<File> jars = new LinkedHashSet<File>();
 
-	public static void premain(final String a, final Instrumentation inst) {
-
-		Agent.agentmain(a,inst);
-
+	public static String getRootFolder() {
+		return rootFolder;
 	}
 
-    // The JRE will call method before launching your main()
-    public static void agentmain(final String a, final Instrumentation inst) {
+	public static Integer getJavaVersion() {
+		return javaVersion;
+	}
+
+	/**
+	 * Returns the Java version as an int value.
+	 * @return the Java version as an int value (8, 9, etc.)
+	 * @since 12130
+	 */
+	public static int internalGetJavaVersion() {
+		String version = System.getProperty("java.version");
+		if (version.startsWith("1.")) {
+			version = version.substring(2);
+		}
+		// Allow these formats:
+		// 1.8.0_72-ea
+		// 9-ea
+		// 9
+		// 9.0.1
+		int dotPos = version.indexOf('.');
+		int dashPos = version.indexOf('-');
+		return Integer.parseInt(version.substring(0,
+				dotPos > -1 ? dotPos : dashPos > -1 ? dashPos : 1));
+	}
+
+	public static void boot(final String a, final Instrumentation inst) {
 
 		Agent.inst = inst;
 
+		javaVersion = internalGetJavaVersion();
+
 		rootFolder = Agent.urlToFile(Agent.getLocation(Agent.class)).getParentFile().getAbsolutePath();
 
-		System.out.println(rootFolder);
-		System.out.println(System.getenv("APP_HOME"));
+		GlobalConfig.load();
 
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(rootFolder))) {
 			for (Path path : stream) {
@@ -51,7 +77,14 @@ public class Agent {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+	public static void premain(final String a, final Instrumentation inst) {
+		boot(a,inst);
+	}
 
+    // The JRE will call method before launching your main()
+    public static void agentmain(final String a, final Instrumentation inst) {
+		boot(a,inst);
 	}
 
     public static boolean contains(File f) {

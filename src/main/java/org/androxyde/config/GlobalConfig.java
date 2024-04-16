@@ -1,33 +1,36 @@
 package org.androxyde.config;
 
-import org.androxyde.utils.Json;
-
+import org.androxyde.Agent;
 import java.io.File;
-import java.net.URL;
+import java.io.FileReader;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Properties;
 
 public class GlobalConfig {
 
-	static Properties properties = new Properties();
+	private static Properties properties = new Properties();
 	
 	public static void load() {
 		try {
-			String clidir = new File(GlobalConfig.class.getClassLoader().getResource("org/manu/config/GlobalConfig.class").getFile().split("!")[0]).getParent();
-			properties.load(new URL(clidir+File.separator+"conf"+File.separator+"config.properties").openStream());
+			properties.load(new FileReader(Agent.getRootFolder()+File.separator+"conf"+File.separator+"config.properties"));
 		} catch (Exception e) {
 		}
+		try {
+			properties.setProperty("pf_env",Files.readString(new File("/etc/dbCLI/pf_env").toPath()));
+		} catch (Exception e) {}
 	}
 
 	public static String getProperty(String property) {
 		
-		if (properties.size()==0) load();
 		return Optional.ofNullable(properties.getProperty(property)).orElse("");
 		
 	}
 
-	public static String toJson() {
-		return Json.prettyPrint(properties);
+	public static void setProperty(String key, String value) {
+
+		properties.setProperty(key,value);
+
 	}
 
 }

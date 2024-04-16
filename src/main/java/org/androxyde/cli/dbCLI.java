@@ -1,23 +1,18 @@
 package org.androxyde.cli;
 
-import io.micronaut.configuration.picocli.MicronautFactory;
-import io.micronaut.configuration.picocli.PicocliRunner;
-import io.micronaut.context.ApplicationContext;
-
 import io.micronaut.context.annotation.Property;
-import io.micronaut.context.env.Environment;
-import jakarta.inject.Inject;
+import io.micronaut.core.annotation.Introspected;
+import jakarta.inject.Singleton;
 import org.androxyde.cli.oracle.CommandInventory;
-import org.androxyde.logger.LoggerUtils;
-import picocli.CommandLine;
+import org.androxyde.cli.oracle.CommandServer;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-
 import java.util.concurrent.Callable;
 
+@Introspected
+@Singleton
 @Command(name = "dbCLI", description = "...", mixinStandardHelpOptions = true,
-        subcommands = { CommandInventory.class }
+        subcommands = { CommandInventory.class, CommandServer.class }
 )
 public class dbCLI implements Callable<Integer> {
 
