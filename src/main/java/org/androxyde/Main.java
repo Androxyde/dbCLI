@@ -8,43 +8,35 @@ import java.util.List;
 import java.util.Set;
 import io.micronaut.configuration.picocli.MicronautFactory;
 import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.env.PropertySource;
 import org.androxyde.cli.MyCommandListRenderer;
 import org.androxyde.cli.MyExceptionHandler;
 import org.androxyde.cli.dbCLI;
 import org.androxyde.config.GlobalConfig;
+import org.androxyde.utils.Json;
+import org.androxyde.utils.OS;
+import org.buildobjects.process.ProcBuilder;
 import picocli.CommandLine;
+
+import static io.micronaut.context.env.PropertySource.mapOf;
 import static picocli.CommandLine.Model.UsageMessageSpec.SECTION_KEY_COMMAND_LIST;
 
 public class Main {
 
 	static Set<File> folders = new LinkedHashSet<File>();
-	static List<File> oracleFolders = new ArrayList<File>();
 
 	static class JarFilter implements FilenameFilter {
 		
 		String filter;
 		
 		public JarFilter(String filter) {
-			this.filter=filter;
+			this.filter=filter+".*.jar$";
 		}
 
 		public boolean accept(File dir, String name) {
 			return name.toLowerCase().matches(filter);
 		}
 
-	}
-
-	public static void feedFolders() {
-		
-		for (String stringFile:GlobalConfig.getProperty("groovy_libs").split(";")) {
-			if (new File(stringFile).isDirectory()) {
-				folders.add(new File(stringFile));
-			}
-			if (new File(stringFile+File.separator+"extras").isDirectory()) {
-				folders.add(new File(stringFile+File.separator+"extras"));
-			}
-		}
-		
 	}
 
 	public static void loadBootJars() {
@@ -63,7 +55,7 @@ public class Main {
 	public static void loadJars() {
         try {
         	for (File folder:folders) {
-        		for (File jar:folder.listFiles(new JarFilter("^((?!jdbc|ucp).)*jar$"))) {
+        		for (File jar:folder.listFiles(new JarFilter("^((?!jdbc|ucp|server).)*jar$"))) {
         			if (!Agent.contains(jar)) Agent.addToClassPath(jar);
         		}
         	}
@@ -162,8 +154,6 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		feedFolders();
-
 		loadBootJars();
 
 		String env="prod";
@@ -174,7 +164,15 @@ public class Main {
 		}
 
 		try (ApplicationContext context = ApplicationContext.builder(
-				dbCLI.class, env).start()) {
+				dbCLI.class, "cli").start()) {
+			context.getEnvironment().addPropertySource(
+					PropertySource.of(
+							"cli",
+							mapOf(
+									"api.url", "myurl"
+							))
+			).refresh();
+
 			CommandLine cmd = new CommandLine(dbCLI.class, new MicronautFactory(context))
 					.setCaseInsensitiveEnumValuesAllowed(true)
 					.setUsageHelpAutoWidth(true)

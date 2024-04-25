@@ -42,7 +42,7 @@ public class Agent {
 	 * @return the Java version as an int value (8, 9, etc.)
 	 * @since 12130
 	 */
-	public static int internalGetJavaVersion() {
+	private static int internalGetJavaVersion() {
 		String version = System.getProperty("java.version");
 		if (version.startsWith("1.")) {
 			version = version.substring(2);
