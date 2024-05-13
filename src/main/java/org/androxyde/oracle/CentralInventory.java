@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -28,8 +29,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @Serdeable
 public class CentralInventory {
 
-    @JacksonXmlProperty(localName="HOME_LIST")
-    List<InventoryHome> homes;
+    List<InventoryHome> homes = new LinkedList<>();
 
     String inventoryLoc;
     String instGroup;
@@ -51,6 +51,7 @@ public class CentralInventory {
                 if (xr.getEventType() == START_ELEMENT) {
                     if ("HOME".equals(xr.getLocalName())) {
                         InventoryHome ihome = xm.readValue(xr, InventoryHome.class);
+                        homes.add(ihome);
                         Homes.add(ihome.getLocation());
                     }
                 }

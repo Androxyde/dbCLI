@@ -16,7 +16,7 @@ public class CentralInventories {
 
     public static void add(String invPtrLoc) {
 
-        String ptrPath=Home.sanitize(invPtrLoc);
+        String ptrPath=Homes.sanitize(invPtrLoc);
 
         if (!inventories.containsKey(invPtrLoc)) {
             inventories.put(ptrPath,new CentralInventory(ptrPath));

@@ -13,11 +13,11 @@ public class Oratab {
 
     private static Map<String,OratabEntry> entries = new HashMap<>();
 
-    public static void load(Boolean force) {
+    public static void load(Boolean force, String location) {
 
         if (force) entries.clear();
 
-        try (Scanner sc = new Scanner(new BufferedReader(new FileReader("/etc/oratab")))) {
+        try (Scanner sc = new Scanner(new BufferedReader(new FileReader(location)))) {
             while (sc.hasNextLine()) {
                 String line=sc.nextLine();
                 if (line.matches("^[A-Za-z][A-Za-z0-9]+:.*")) {

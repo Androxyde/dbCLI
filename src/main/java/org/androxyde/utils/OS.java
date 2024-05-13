@@ -19,16 +19,22 @@ import java.util.List;
 @Slf4j
 public class OS {
 
+    public static ProcResult executeRaw(ProcBuilder proc) {
+        log.info("Command line : " + proc.getCommandLine());
+        return proc.run();
+    }
+
     public static CommandResult execute(ProcBuilder proc) {
         CommandResult result = CommandResult.builder().build();
         ProcResult r = proc.withOutputConsumer(new StreamConsumer() {
             @Override
             public void consume(InputStream stream) throws IOException {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                String line;
-                while(reader.ready()) {
-                    result.addStdout(reader.readLine());
-                }
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.addStdout(line);
+                    }
+
             }
         }).run();
 
