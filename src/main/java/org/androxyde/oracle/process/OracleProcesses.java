@@ -1,5 +1,6 @@
 package org.androxyde.oracle.process;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.serde.annotation.Serdeable;
 import lombok.Builder;
 import lombok.Data;
@@ -8,10 +9,11 @@ import lombok.extern.jackson.Jacksonized;
 import java.util.HashSet;
 import java.util.Set;
 
-@Serdeable
-@Builder
 @Data
+@Builder
 @Jacksonized
+@Serdeable
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class OracleProcesses {
 
     @Builder.Default
