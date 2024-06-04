@@ -3,10 +3,10 @@ package org.androxyde.cli.oracle;
 import io.micronaut.serde.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.androxyde.logger.LoggerUtils;
-import org.androxyde.oracle.Oratab;
-import org.androxyde.oracle.Processes;
+import org.androxyde.oracle.process.Processes;
+import org.androxyde.utils.Json;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import jakarta.inject.Inject;
@@ -32,7 +32,8 @@ public class CommandInventoryProcesses implements Callable<Integer> {
 
         Processes.load(true);
 
-        writeToStdout(Processes.get());
+        Json.toStdout(Processes.get());
+        //writeToStdout(Processes.get());
 
         return 0;
 

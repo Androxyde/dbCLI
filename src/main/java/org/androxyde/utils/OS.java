@@ -1,6 +1,7 @@
 package org.androxyde.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.androxyde.oracle.process.ProcessConsumer;
 import org.buildobjects.process.ProcBuilder;
 import org.buildobjects.process.ProcResult;
 import org.buildobjects.process.StreamConsumer;
@@ -12,12 +13,12 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 public class OS {
+
+    public static Map<String, UserInfos> users = new HashMap<>();
 
     public static ProcResult executeRaw(ProcBuilder proc) {
         log.info("Command line : " + proc.getCommandLine());
@@ -57,6 +58,24 @@ public class OS {
         } catch (UnknownHostException e) {}
 
         return OSName.builder().build();
+    }
+
+    public static UserInfos getUserInfos(String username) {
+
+        if (users.containsKey(username)) return users.get(username);
+
+        UserInfos infos = UserInfos.builder().build();
+
+        ProcBuilder pb = new ProcBuilder("id")
+                .withArg(username)
+                .withOutputConsumer(new IdConsumer(infos));
+
+        OS.executeRaw(pb);
+
+        users.put(username, infos);
+
+        return infos;
+
     }
 
 }

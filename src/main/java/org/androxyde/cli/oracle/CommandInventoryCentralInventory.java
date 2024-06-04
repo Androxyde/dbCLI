@@ -3,8 +3,8 @@ package org.androxyde.cli.oracle;
 import io.micronaut.serde.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.androxyde.logger.LoggerUtils;
-import org.androxyde.oracle.CentralInventories;
-import org.androxyde.oracle.Oratab;
+import org.androxyde.oracle.inventory.CentralInventories;
+import org.androxyde.utils.Json;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import java.io.IOException;
@@ -35,7 +35,8 @@ public class CommandInventoryCentralInventory implements Callable<Integer> {
 
         CentralInventories.add(invPtrLoc);
 
-        writeToStdout(CentralInventories.get());
+        System.out.println(Json.prettyPrint(CentralInventories.get()));
+        //writeToStdout(CentralInventories.get());
 
         return 0;
 

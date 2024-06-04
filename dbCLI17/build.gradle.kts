@@ -1,7 +1,7 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.3.6"
-    id("io.micronaut.aot") version "4.3.6"
+    id("io.micronaut.application") version "4.3.8"
+    id("io.micronaut.aot") version "4.3.8"
 }
 
 version = "0.1"
@@ -30,13 +30,13 @@ dependencies {
     annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.5")
+    annotationProcessor("info.picocli:picocli-codegen:4.7.6")
 
     compileOnly("io.micronaut:micronaut-http-client")
     compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
     compileOnly("org.projectlombok:lombok:1.18.32")
 
-    implementation("io.micronaut.picocli:micronaut-picocli:4.7.5")
+    implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut:micronaut-aop")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("io.micronaut:micronaut-websocket")
@@ -56,17 +56,16 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security")
     implementation("jakarta.validation:jakarta.validation-api")
     implementation("jakarta.persistence:jakarta.persistence-api")
-    implementation("info.picocli:picocli")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.0")
+    implementation("info.picocli:picocli:4.7.6")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.1")
 
     implementation("com.fasterxml.uuid:java-uuid-generator:5.0.0")
-    implementation("ch.qos.logback:logback-core:1.5.4")
+    implementation("ch.qos.logback:logback-core:1.5.6")
     implementation("org.buildobjects:jproc:2.8.2")
     implementation("org.apache.commons:commons-lang3:3.14.0")
 
-
-    implementation("ch.qos.logback:logback-classic:1.5.4")
+    implementation("ch.qos.logback:logback-classic:1.5.6")
     runtimeOnly("org.slf4j:slf4j-ext:2.0.13")
     runtimeOnly("org.yaml:snakeyaml")
     runtimeOnly("com.h2database:h2")

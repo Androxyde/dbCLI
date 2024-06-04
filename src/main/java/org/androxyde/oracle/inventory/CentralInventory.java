@@ -1,13 +1,13 @@
-package org.androxyde.oracle;
+package org.androxyde.oracle.inventory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import io.micronaut.serde.annotation.Serdeable;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.androxyde.oracle.home.Homes;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -27,6 +27,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Serdeable
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CentralInventory {
 
     List<InventoryHome> homes = new LinkedList<>();

@@ -3,7 +3,8 @@ package org.androxyde.cli.oracle;
 import io.micronaut.serde.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.androxyde.logger.LoggerUtils;
-import org.androxyde.oracle.Oratab;
+import org.androxyde.oracle.oratab.Oratab;
+import org.androxyde.utils.Json;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import java.io.IOException;
@@ -34,7 +35,8 @@ public class CommandInventoryOratab implements Callable<Integer> {
 
         Oratab.load(true, oratabLocation);
 
-        writeToStdout(Oratab.get());
+        System.out.println(Json.prettyPrint(Oratab.get()));
+        //writeToStdout(Oratab.get());
 
         return 0;
 
