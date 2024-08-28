@@ -1,2 +1,2 @@
 rootProject.name="dbCLI"
-include("refresh", "dbCLI", "os", "oracle")
+include("refresh", "cli", "os", "oracle")
