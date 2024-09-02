@@ -1,5 +1,6 @@
 package org.androxyde.oracle.inventory;
 
+import org.androxyde.oracle.OraUtils;
 import org.androxyde.oracle.home.Homes;
 import org.androxyde.os.OS;
 
@@ -21,7 +22,7 @@ public class CentralInventories {
     public static void add(Properties invPtrLoc) {
 
         if (invPtrLoc.containsKey("inventory_loc")) {
-            String inventoryPath = Homes.sanitize(invPtrLoc.getProperty("inventory_loc"));
+            String inventoryPath = OraUtils.sanitize(invPtrLoc.getProperty("inventory_loc"));
             if (!inventories.containsKey(invPtrLoc.getProperty("inventory_loc"))) {
                 inventories.put(inventoryPath, new CentralInventory(invPtrLoc));
             }

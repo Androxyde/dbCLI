@@ -54,7 +54,7 @@ public class OraUtils {
 
     }
 
-    public static OracleProcesses getOracleProcesses() {
+    public static OracleProcesses getOracleProcesses(OracleProcesses reference) {
 
         OracleProcesses processes = OracleProcesses.builder().build();
 
@@ -64,7 +64,7 @@ public class OraUtils {
             ProcBuilder pb = new ProcBuilder("ps")
                     .withArg("-eo")
                     .withArg("user,pid,args")
-                    .withOutputConsumer(new ProcessConsumer(processes, pool));
+                    .withOutputConsumer(new ProcessConsumer(processes, reference, pool));
 
             OS.executeRaw(pb);
 
@@ -82,6 +82,13 @@ public class OraUtils {
 
         return processes;
 
+    }
+
+    public static String sanitize(String path) {
+        while (path.endsWith("/")) {
+            return sanitize(path.substring(0, path.length() - 1));
+        }
+        return path.replaceAll("/+","/");
     }
 
 }

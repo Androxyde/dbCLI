@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import io.micronaut.serde.annotation.Serdeable;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.androxyde.oracle.OraUtils;
 import org.androxyde.oracle.home.Homes;
 import org.androxyde.oracle.process.OracleProcess;
 
@@ -62,7 +63,7 @@ public class CentralInventory {
 
         if (invPtr.containsKey("inventory_loc") && invPtr.containsKey("inst_group")) {
             try {
-                inventoryLoc = Homes.sanitize(invPtr.getProperty("inventory_loc"));
+                inventoryLoc = OraUtils.sanitize(invPtr.getProperty("inventory_loc"));
                 instGroup = invPtr.getProperty("inst_group");
                 File inventory = new File(inventoryLoc + "/ContentsXML/inventory.xml");
                 XmlMapper xm = new XmlMapper();

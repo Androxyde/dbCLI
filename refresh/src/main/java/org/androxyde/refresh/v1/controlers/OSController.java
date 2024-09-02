@@ -2,13 +2,12 @@ package org.androxyde.refresh.v1.controlers;
 
 import io.micronaut.http.annotation.*;
 import org.androxyde.oracle.Oracle;
+import org.androxyde.oracle.home.Homes;
 import org.androxyde.oracle.oratab.OratabEntry;
-import org.androxyde.oracle.home.HomeSet;
 import org.androxyde.oracle.process.OracleProcesses;
 import org.androxyde.os.OS;
 import org.androxyde.os.UserInfos;
 
-import java.util.Map;
 import java.util.Set;
 
 @Controller("/os")
@@ -17,7 +16,7 @@ public class OSController {
     Oracle oracle;
 
     public OSController() {
-        this.oracle=Oracle.builder().build();
+        oracle=Oracle.builder().withgchomes(true).withcentralinventory(true).withoratab(true).withprocesses(true).build();;
     }
 
     @Get(uri="/users/{name}", produces="application/json")
@@ -30,20 +29,24 @@ public class OSController {
     @Get(uri="/processes", produces="application/json")
     public OracleProcesses getProcesses() {
 
-        return oracle.getProcesses();
+        oracle.refreshProcesses();
+        return oracle.fetchProcesses();
 
     }
 
     @Get(uri="/oratab", produces="application/json")
     public Set<OratabEntry> getOratab() {
 
-        return oracle.getOratabEntries();
+        oracle.refreshOratab();
+        return oracle.fetchOratab();
 
     }
 
     @Get(uri="/homes", produces="application/json")
-    public Map<String, HomeSet> getHomes() {
+    public Homes getHomes() {
 
+        oracle.refresh();
+        oracle.computeHomes(null);
         return oracle.getOracleHomes();
 
     }

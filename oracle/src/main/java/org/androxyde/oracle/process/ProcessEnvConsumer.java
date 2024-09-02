@@ -1,6 +1,7 @@
 package org.androxyde.oracle.process;
 
 import lombok.Getter;
+import org.androxyde.oracle.OraUtils;
 import org.androxyde.oracle.home.Homes;
 import org.buildobjects.process.StreamConsumer;
 import java.io.BufferedReader;
@@ -27,10 +28,10 @@ public class ProcessEnvConsumer implements StreamConsumer {
                 String[] elems = elem.split("=");
                 if (elems.length == 2) {
                     if (elems[0].equals("ORACLE_HOME") && process.getHomeLocation()==null) {
-                        process.setHomeLocation(Homes.sanitize(elems[1]));
+                        process.setHomeLocation(OraUtils.sanitize(elems[1]));
                     }
                     if (elems[0].equals("TNS_ADMIN")) {
-                        process.setTnsAdminLocation(Homes.sanitize(elems[1]));
+                        process.setTnsAdminLocation(OraUtils.sanitize(elems[1]));
                     }
                 }
             }

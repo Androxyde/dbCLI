@@ -9,7 +9,7 @@ import org.androxyde.oracle.database.Database;
 import org.androxyde.oracle.database.DatabaseSet;
 import org.androxyde.oracle.gchomes.GCHome;
 import org.androxyde.oracle.home.Home;
-import org.androxyde.oracle.home.HomeSet;
+import org.androxyde.oracle.home.Homes;
 import org.androxyde.oracle.inventory.CentralInventory;
 import org.androxyde.oracle.inventory.InventoryHome;
 import org.androxyde.oracle.oratab.OratabEntry;
@@ -46,12 +46,15 @@ public class Oracle {
     @JsonIgnore
     Boolean withgchomes;
 
+    @JsonIgnore
+    Boolean locked=false;
+
     OracleProcesses processes;
     Set<OratabEntry> oratabEntries;
     Set<CentralInventory> inventories;
     Set<GCHome> oragchomelist;
     DatabaseSet databases;
-    Map<String, HomeSet> oracleHomes;
+    Homes oracleHomes=new Homes();
 
     public Oracle(Boolean withoratab, Boolean withprocesses, Boolean withcentralinventory, Boolean withtools, Boolean withgchomes) {
 
@@ -61,30 +64,7 @@ public class Oracle {
         this.withtools=withtools;
         this.withgchomes=withgchomes;
 
-        if (withprocesses)
-            processes=OraUtils.getOracleProcesses();
-
-        if (withoratab)
-            oratabEntries = OraUtils.getOratab("/etc/oratab");
-
-        if (withcentralinventory) {
-            inventories = new HashSet<>();
-            Properties p = OS.toProperties("/etc/oraInst.loc");
-            inventories.add(new CentralInventory(p));
-            inventories.removeIf(element -> !element.valid());
-        }
-
-        if (withgchomes) {
-            try {
-                oragchomelist=new HashSet<>();
-                for (String line : Files.readAllLines(Path.of("/etc/oragchomelist"))) {
-                    String[] entries = line.split(":");
-                    if (entries.length==2) {
-                        oragchomelist.add(GCHome.builder().homeLocation(entries[0].trim()).homeStateDir(entries[1].trim()).build());
-                    }
-                }
-            } catch (IOException ignored) {}
-        }
+        refresh();
 
     }
 
@@ -134,10 +114,7 @@ public class Oracle {
 
     }
 
-    public void computeHomes() {
-
-        if (oracleHomes==null) oracleHomes = new HashMap<>();
-        else oracleHomes.clear();
+    public void computeHomes(Homes reference) {
 
         Set<Home> homes = new HashSet<>();
 
@@ -145,9 +122,14 @@ public class Oracle {
 
         try {
             for (GCHome home: Optional.ofNullable(oragchomelist).orElse(new HashSet<>())) {
-                Home h = Home.builder().homeLocation(home.getHomeLocation()).build();
-                if (homes.add(h))
-                    processHome(h, pool);
+                if (reference.getIndex().containsKey(home.getHomeLocation())) {
+                    homes.add(reference.getIndex().get(home.getHomeLocation()));
+                }
+                else {
+                    Home h = Home.builder().homeLocation(home.getHomeLocation()).build();
+                    if (homes.add(h))
+                        processHome(h, pool);
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -155,9 +137,14 @@ public class Oracle {
 
         try {
             for (String home: Optional.ofNullable(processes.homes()).orElse(new HashSet<>())) {
-                Home h = Home.builder().homeLocation(home).build();
-                if (homes.add(h))
-                    processHome(h, pool);
+                if (reference.getIndex().containsKey(home)) {
+                    homes.add(reference.getIndex().get(home));
+                }
+                else {
+                    Home h = Home.builder().homeLocation(home).build();
+                    if (homes.add(h))
+                        processHome(h, pool);
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -165,9 +152,14 @@ public class Oracle {
 
         try {
             for (OratabEntry entry:Optional.ofNullable(oratabEntries).orElse(new HashSet<>())) {
-                Home h = Home.builder().homeLocation(entry.getHomeLocation()).build();
-                if (homes.add(h))
-                    processHome(h, pool);
+                if (reference.getIndex().containsKey(entry.getHomeLocation())) {
+                    homes.add(reference.getIndex().get(entry.getHomeLocation()));
+                }
+                else {
+                    Home h = Home.builder().homeLocation(entry.getHomeLocation()).build();
+                    if (homes.add(h))
+                        processHome(h, pool);
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -176,9 +168,14 @@ public class Oracle {
         try {
             for (CentralInventory entry:Optional.ofNullable(inventories).orElse(new HashSet<>())) {
                 for (InventoryHome home:entry.getHomes()) {
-                    Home h = Home.builder().homeLocation(home.getLocation()).build();
-                    if (homes.add(h))
-                        processHome(h, pool);
+                    if (reference.getIndex().containsKey(home.getLocation())) {
+                        homes.add(reference.getIndex().get(home.getLocation()));
+                    }
+                    else {
+                        Home h = Home.builder().homeLocation(home.getLocation()).build();
+                        if (homes.add(h))
+                            processHome(h, pool);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -197,8 +194,7 @@ public class Oracle {
 
         for (Home h:homes) {
             if (h.valid()) {
-                oracleHomes.computeIfAbsent(h.getHomeType().toLowerCase(), k -> new HomeSet());
-                oracleHomes.get(h.getHomeType().toLowerCase()).add(h);
+                oracleHomes.add(h);
             }
         }
 
@@ -224,17 +220,14 @@ public class Oracle {
 
     public void computeDatabases() {
 
-        if (oracleHomes == null) computeHomes();
+        if (oracleHomes == null) computeHomes(null);
 
         databases=new DatabaseSet();
 
         try {
             Home h = null;
             for (OratabEntry entry:Optional.ofNullable(oratabEntries).orElse(new HashSet<>())) {
-                for (HomeSet s:oracleHomes.values()) {
-                    h=s.get(entry.getHomeLocation());
-                    if (h!=null) break;
-                }
+                h=oracleHomes.get(entry.getHomeLocation());
                 if (h!=null) {
                     Database d = Database.builder().oracleSid(entry.getOracleSid())
                             .homeLocation(entry.getHomeLocation())
@@ -250,11 +243,7 @@ public class Oracle {
             for (OracleProcess p: Optional.ofNullable(processes.getDatabases()).orElse(new HashSet<>())) {
                 Database d = databases.get(p.getName());
                 if (d==null) {
-                    Home h=null;
-                    for (HomeSet s:oracleHomes.values()) {
-                        h=s.get(p.getHomeLocation());
-                        if (h!=null) break;
-                    }
+                    Home h=oracleHomes.get(p.getHomeLocation());
                     if (h!=null) {
                         d = Database.builder().oracleSid(p.getName())
                                 .homeLocation(p.getHomeLocation())
@@ -272,4 +261,83 @@ public class Oracle {
         }
 
     }
+
+    synchronized public OracleProcesses fetchProcesses() {
+        while (locked);
+        return processes;
+    }
+
+    synchronized public Set<OratabEntry> fetchOratab() {
+        while (locked);
+        return oratabEntries;
+    }
+    synchronized public void refreshProcesses() {
+
+        while (locked);
+
+        locked = true;
+
+        if (withproceses) {
+            if (processes==null)
+                processes=OraUtils.getOracleProcesses(null);
+            else
+                processes = OraUtils.getOracleProcesses(processes);
+        }
+
+        locked = false;
+
+    }
+
+    synchronized public void refreshOratab() {
+
+        while (locked);
+
+        locked = true;
+
+        if (withoratab)
+            oratabEntries = OraUtils.getOratab("/etc/oratab");
+
+        locked = false;
+
+    }
+
+    synchronized public void refresh() {
+
+        while (locked);
+
+        locked = true;
+
+        if (withproceses) {
+            if (processes==null)
+                processes=OraUtils.getOracleProcesses(null);
+            else
+                processes = OraUtils.getOracleProcesses(processes);
+        }
+
+        if (withoratab)
+            oratabEntries = OraUtils.getOratab("/etc/oratab");
+
+        if (withcentralinventory) {
+            inventories = new HashSet<>();
+            Properties p = OS.toProperties("/etc/oraInst.loc");
+            inventories.add(new CentralInventory(p));
+            inventories.removeIf(element -> !element.valid());
+        }
+
+        if (withgchomes) {
+            try {
+                oragchomelist=new HashSet<>();
+                for (String line : Files.readAllLines(Path.of("/etc/oragchomelist"))) {
+                    String[] entries = line.split(":");
+                    if (entries.length==2) {
+                        oragchomelist.add(GCHome.builder().homeLocation(entries[0].trim()).homeStateDir(entries[1].trim()).build());
+                    }
+                }
+            } catch (IOException ignored) {}
+        }
+
+        locked=false;
+
+    }
+
 }

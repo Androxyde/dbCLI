@@ -1,31 +1,50 @@
 package org.androxyde.oracle.home;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.micronaut.serde.annotation.Serdeable;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+@Serdeable
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@Slf4j
 public class Homes {
 
-    private static Set<String> processed = new HashSet<>();
-    private static final Map<String, Set<Home>> oracleHomes = new HashMap<>();
+    @JsonIgnore
+    Map<String, Home> index = new HashMap<>();
 
-    public static void add(Home h) {
-        if (processed.add(h.getHomeLocation())) {
-            h.fetchLocalInventory();
-                if (!oracleHomes.containsKey(h.getHomeType()))
-                    oracleHomes.put(h.getHomeType(),new HashSet<>());
-                oracleHomes.get(h.getHomeType()).add(h);
-        }
+    Set<Home> rdbmsHomes = new HashSet<>();
+
+    Set<Home> crsHomes = new HashSet<>();
+
+    Set<Home> agentHomes = new HashSet<>();
+
+    public boolean add(Home h) {
+        index.put(h.homeLocation, h);
+        if (h.getHomeType().equals("RDBMS"))
+            return rdbmsHomes.add(h);
+        if (h.getHomeType().equals("AGENT"))
+            return agentHomes.add(h);
+        if (h.getHomeType().equals("CRS"))
+            return crsHomes.add(h);
+
+        return false;
     }
 
-    public static Map<String, Set<Home>> get() {
-        return oracleHomes;
-    }
-
-    public static String sanitize(String path) {
-        while (path.endsWith("/")) {
-            return sanitize(path.substring(0, path.length() - 1));
-        }
-        return path.replaceAll("/+","/");
+    @JsonIgnore
+    public Home get(String location) {
+        return index.get(location);
     }
 
 }
