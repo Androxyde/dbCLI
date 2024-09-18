@@ -37,9 +37,8 @@ public class ProcessConsumer implements StreamConsumer {
                     ProcBuilder pb = new ProcBuilder("ps")
                             .withArg("ewwo")
                             .withArg("command")
-                            .withArg(p.getPid().toString())
-                            .withOutputConsumer(c);
-                    OS.executeRaw(pb);
+                            .withArg(p.getPid().toString());
+                    OS.execute(pb,null,c);
                 }
             }
         };

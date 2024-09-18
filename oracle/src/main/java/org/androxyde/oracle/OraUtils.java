@@ -63,10 +63,9 @@ public class OraUtils {
 
             ProcBuilder pb = new ProcBuilder("ps")
                     .withArg("-eo")
-                    .withArg("user,pid,args")
-                    .withOutputConsumer(new ProcessConsumer(processes, reference, pool));
+                    .withArg("user,pid,args");
 
-            OS.executeRaw(pb);
+            OS.execute(pb,null,new ProcessConsumer(processes, reference, pool));
 
             pool.shutdown();
 

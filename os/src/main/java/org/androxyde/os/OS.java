@@ -33,19 +33,16 @@ public class OS {
         }
     }
 
-    public static ProcResult executeRaw(ProcBuilder proc) {
-        log.info("Command line : " + proc.getCommandLine());
-        return proc.run();
-    }
+    public static CommandResult execute(ProcBuilder proc, Map env, StreamConsumer consumer) {
 
-    public static CommandResult execute(ProcBuilder proc) {
+        Long id = OS.SEQ_ID.getAndIncrement();
 
-        log.info("CMD:" + proc.getCommandLine());
+        log.info("OS_RUN:"+id+":BEGIN:" + proc.getCommandLine());
 
         CommandResult result = CommandResult.builder().build();
 
-        try {
-            ProcResult r = proc.withOutputConsumer(new StreamConsumer() {
+        if (consumer==null) {
+            consumer = new StreamConsumer() {
                 @Override
                 public void consume(InputStream stream) throws IOException {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -55,15 +52,19 @@ public class OS {
                     }
 
                 }
-            }).run();
+            };
+        }
+
+        try {
+            ProcResult r = proc.withOutputConsumer(consumer).run();
             result.setReturnCode(r.getExitValue());
             result.setStdOutComplete(true);
         } catch (Exception e) {
             result.setReturnCode(1);
-            log.error("CMD:"+e.getMessage());
+            log.error("OS_RUN:"+id+":"+e.getMessage());
             result.setStdOutComplete(false);
         }
-
+        log.info("OS_RUN:"+id+":END:"+result.getReturnCode());
         return result;
 
     }
@@ -99,10 +100,9 @@ public class OS {
         UserInfos infos = UserInfos.builder().build();
 
         ProcBuilder pb = new ProcBuilder("id")
-                .withArg(username)
-                .withOutputConsumer(new IdConsumer(infos));
+                .withArg(username);
 
-        OS.executeRaw(pb);
+        OS.execute(pb,null,new IdConsumer(infos));
 
         users.put(username, infos);
 
@@ -115,7 +115,7 @@ public class OS {
         ProcBuilder pb = new ProcBuilder("id")
                 .withArg("-un");
 
-        CommandResult r = OS.execute(pb);
+        CommandResult r = OS.execute(pb,null,null);
 
         try {
             return r.getStdout().get(0).trim();

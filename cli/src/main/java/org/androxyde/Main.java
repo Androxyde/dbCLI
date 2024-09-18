@@ -21,20 +21,6 @@ public class Main {
 
 	static Set<File> folders = new LinkedHashSet<File>();
 
-	static class JarFilter implements FilenameFilter {
-		
-		String filter;
-		
-		public JarFilter(String filter) {
-			this.filter=filter+"\\.jar$";
-		}
-
-		public boolean accept(File dir, String name) {
-			return name.toLowerCase().matches(filter);
-		}
-
-	}
-
 	public static void loadBootJars() {
  		try {
         	for (File folder:folders) {

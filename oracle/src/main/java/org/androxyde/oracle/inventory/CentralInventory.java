@@ -34,10 +34,10 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CentralInventory {
 
-    List<InventoryHome> homes = new LinkedList<>();
-
     String inventoryLoc;
     String instGroup;
+
+    List<InventoryHome> homes = new LinkedList<>();
 
     @JsonIgnore
     Boolean isValid = Boolean.TRUE;

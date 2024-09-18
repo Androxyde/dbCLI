@@ -1,7 +1,5 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.4.2"
-    id("io.micronaut.aot") version "4.4.2"
+    id("application") version "4.4.2"
 }
 
 version = "0.1"
@@ -14,21 +12,12 @@ repositories {
 dependencies {
 
     annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    annotationProcessor("io.micronaut.openapi:micronaut-openapi")
+    annotationProcessor("info.picocli:picocli-codegen")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
-    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.6")
-
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut.session:micronaut-session")
-    implementation("io.micronaut:micronaut-http-server-netty")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut.reactor:micronaut-reactor")
-    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
-    implementation("io.micronaut.serde:micronaut-serde-jackson")
+    implementation("info.picocli:picocli")
     implementation("io.micronaut.picocli:micronaut-picocli")
-    implementation("io.micronaut.validation:micronaut-validation")
+    implementation("io.micronaut.serde:micronaut-serde-jackson")
+
 
     implementation("info.picocli:picocli:4.7.6")
     implementation("org.buildobjects:jproc:2.8.2")
@@ -41,7 +30,6 @@ dependencies {
     implementation(project(":os"))
     implementation(project(":oracle"))
 
-    compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
     compileOnly("org.projectlombok:lombok")
 
     runtimeOnly("org.slf4j:jul-to-slf4j:2.0.16")
@@ -54,8 +42,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.toVersion("21")
+    targetCompatibility = JavaVersion.toVersion("21")
 }
 
 tasks.withType<Jar> {
@@ -72,7 +60,7 @@ tasks.withType<Jar> {
 }
 
 micronaut {
-    testRuntime("spock2")
+    testRuntime("junit5")
     processing {
         incremental(true)
         annotations("org.androxyde.*")

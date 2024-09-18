@@ -31,7 +31,7 @@ public class Homes {
     Set<Home> agentHomes = new HashSet<>();
 
     public boolean add(Home h) {
-        index.put(h.homeLocation, h);
+        index.put(h.getHomeLocation(), h);
         if (h.getHomeType().equals("RDBMS"))
             return rdbmsHomes.add(h);
         if (h.getHomeType().equals("AGENT"))
@@ -40,6 +40,13 @@ public class Homes {
             return crsHomes.add(h);
 
         return false;
+    }
+
+    public void clear() {
+        index.clear();
+        rdbmsHomes.clear();
+        agentHomes.clear();
+        crsHomes.clear();
     }
 
     @JsonIgnore

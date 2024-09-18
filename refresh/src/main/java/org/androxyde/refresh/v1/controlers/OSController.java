@@ -2,6 +2,8 @@ package org.androxyde.refresh.v1.controlers;
 
 import io.micronaut.http.annotation.*;
 import org.androxyde.oracle.Oracle;
+import org.androxyde.oracle.database.Database;
+import org.androxyde.oracle.database.Databases;
 import org.androxyde.oracle.home.Homes;
 import org.androxyde.oracle.oratab.OratabEntry;
 import org.androxyde.oracle.process.OracleProcesses;
@@ -46,8 +48,18 @@ public class OSController {
     public Homes getHomes() {
 
         oracle.refresh();
-        oracle.computeHomes(null);
-        return oracle.getOracleHomes();
+        oracle.computeHomes();
+        return oracle.getHomes();
+
+    }
+
+    @Get(uri="/databases", produces="application/json")
+    public Set<Database> getDatabases() {
+
+        oracle.refresh();
+        oracle.computeHomes();
+        oracle.computeDatabases();
+        return oracle.getDatabases();
 
     }
 

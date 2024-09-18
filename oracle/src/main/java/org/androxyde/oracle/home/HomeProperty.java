@@ -21,7 +21,7 @@ public class HomeProperty {
     @JacksonXmlProperty(localName="NAME")
     String name;
 
-    @JacksonXmlProperty(localName="VALUE")
+    @JacksonXmlProperty(localName="VAL")
     String value;
 
 }

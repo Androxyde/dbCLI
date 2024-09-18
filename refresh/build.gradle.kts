@@ -1,5 +1,4 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.micronaut.application") version "4.4.2"
     id("io.micronaut.aot") version "4.4.2"
 }
@@ -48,13 +47,8 @@ application {
     mainClass = "org.androxyde.refresh.Application"
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion("21")
-    targetCompatibility = JavaVersion.toVersion("21")
-}
-
-
 graalvmNative.toolchainDetection = false
+
 micronaut {
     runtime("netty")
     testRuntime("junit5")

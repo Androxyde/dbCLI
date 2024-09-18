@@ -29,6 +29,12 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @Slf4j
 public class Home {
 
+    @JsonIgnore
+    XmlMapper xm;
+
+    @JsonIgnore
+    XMLInputFactory xif;
+
     String homeLocation;
 
     @JsonIgnore
@@ -39,14 +45,12 @@ public class Home {
     Boolean isValid=Boolean.TRUE;
 
     String homeRelease;
-
     String homeVersion;
-
     String homeOwner;
-    String homeConfig;
+    String homeOwnerPrimaryGroup;
+    String homeDbs;
     String homeBase;
-    String ownerPrimaryGroup;
-    String homeInstallGroup;
+    String inventoryInstallGroup;
     String inventoryLocation;
 
     @Builder.Default
@@ -59,17 +63,22 @@ public class Home {
     static final Set<Long> agentPsu19cRef = Set.of(36335374L);
 
     public void fetchOwner() {
+        String path=null;
+        if (Files.exists(Path.of(homeLocation + "/bin/oracle")))
+            path=homeLocation + "/bin/oracle";
+        else if (Files.exists(Path.of(homeLocation + "/bin/emctl")))
+            path=homeLocation + "/bin/emctl";
         try {
-            UserPrincipal p = Files.getOwner(new File(homeLocation + "/bin/oracle").toPath());
+            UserPrincipal p = Files.getOwner(Path.of(path));
             homeOwner=p.getName();
             UserInfos user = OS.getUserInfos(homeOwner);
-            ownerPrimaryGroup=user.getPrimaryGroup().getName();
+            homeOwnerPrimaryGroup=user.getPrimaryGroup().getName();
         } catch (Exception e) {}
 
         try {
             Properties prop = new Properties();
             prop.load(new FileReader(new File(homeLocation+"/oraInst.loc")));
-            homeInstallGroup=prop.getProperty("inst_group");
+            inventoryInstallGroup=prop.getProperty("inst_group");
             inventoryLocation=prop.getProperty("inventory_loc");
         } catch (Exception e) {}
 
@@ -82,21 +91,47 @@ public class Home {
                     .withArg(homeLocation + "/bin/orabaseconfig;"+homeLocation + "/bin/orabase")
                     .withVar("ORACLE_HOME",homeLocation)
                     .withNoTimeout();
-            CommandResult r = OS.execute(pb);
+            CommandResult r = OS.execute(pb,null,null);
             if (r.getReturnCode() == 0) {
-                homeConfig = r.getStdout().get(0).trim() + "/dbs";
+                homeDbs = r.getStdout().get(0).trim() + "/dbs";
                 homeBase=r.getStdout().get(1).trim();
             }
         }
         else {
-            homeConfig=homeLocation+"/dbs";
+            if (Files.exists(Path.of(homeLocation+"/dbs")))
+                homeDbs=homeLocation+"/dbs";
+            if (xm==null)
+                xm = new XmlMapper();
+            if (xif==null)
+                xif = XMLInputFactory.newInstance();
+            try {
+                XMLStreamReader xr = xif.createXMLStreamReader(new FileInputStream(homeLocation + "/inventory/ContentsXML/oraclehomeproperties.xml"));
+                while (xr.hasNext()) {
+                    xr.next();
+                    if (xr.getEventType() == START_ELEMENT) {
+                        if ("PROPERTY".equals(xr.getLocalName())) {
+                            HomeProperty p = xm.readValue(xr, HomeProperty.class);
+                            if (p.getName().equals("ORACLE_BASE")) {
+                                homeBase=p.getValue();
+                            }
+                        }
+                    }
+                }
+                xr.close();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 
     public void fetchLocalInventory() {
 
-        XmlMapper xm = new XmlMapper();
-        XMLInputFactory xif = XMLInputFactory.newInstance();
+        if (xm==null)
+            xm = new XmlMapper();
+
+        if (xif==null)
+            xif = XMLInputFactory.newInstance();
+
         Map<String, InventoryComp> comps = new HashMap<>();
 
         Set<OneOff> oneoffs = new HashSet<>();
@@ -119,7 +154,8 @@ public class Home {
             }
             xr.close();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            if (!e.getMessage().contains("No such file or directory"))
+                log.error(e.getMessage());
             isValid=Boolean.FALSE;
         }
 
@@ -138,7 +174,8 @@ public class Home {
             }
             xr.close();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            if (!e.getMessage().contains("No such file or directory"))
+                log.error(e.getMessage());
         }
 
         try {
@@ -164,25 +201,8 @@ public class Home {
             }
             xr.close();
         } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-
-        try {
-            XMLStreamReader xr = xif.createXMLStreamReader(new FileInputStream(homeLocation + "/inventory/ContentsXML/oraclehomeproperties.xml"));
-            while (xr.hasNext()) {
-                xr.next();
-                if (xr.getEventType() == START_ELEMENT) {
-                    if ("PROPERTY".equals(xr.getLocalName())) {
-                        HomeProperty p = xm.readValue(xr, HomeProperty.class);
-                        if (p.getName().equals("ORACLE_BASE")) {
-                            homeBase=p.getValue();
-                        }
-                    }
-                }
-            }
-            xr.close();
-        } catch (Exception e) {
-            log.error(e.getMessage());
+            if (!e.getMessage().contains("No such file or directory"))
+                log.error(e.getMessage());
         }
 
         if (comps.containsKey("oracle.crs")) {
@@ -231,12 +251,6 @@ public class Home {
         }
         if (homeVersion==null) homeVersion=homeRelease;
 
-    }
-
-    public void fetchDbsHome() {
-        if (Files.exists(Path.of(homeLocation+"/bin/orabaseconfig"))) {
-
-        }
     }
 
     public boolean valid() {

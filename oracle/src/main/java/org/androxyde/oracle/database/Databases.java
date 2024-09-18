@@ -1,12 +1,10 @@
 package org.androxyde.oracle.database;
 
-import org.androxyde.oracle.home.Home;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class DatabaseSet extends HashSet<Database> {
+public class Databases extends HashSet<Database> {
 
     Map<String, Database> index = new HashMap<>();
 
@@ -18,6 +16,10 @@ public class DatabaseSet extends HashSet<Database> {
 
     public Database get(String oracleSid) {
         return index.get(oracleSid);
+    }
+
+    public void query() {
+
     }
 
 }

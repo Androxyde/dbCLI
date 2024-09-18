@@ -1,6 +1,5 @@
 package org.androxyde;
 
-import java.io.FilenameFilter;
 import org.androxyde.config.GlobalConfig;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -9,14 +8,15 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URLClassLoader;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Agent {
 
@@ -67,16 +67,12 @@ public class Agent {
 
 		GlobalConfig.load();
 
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(rootFolder), new NameFilter(("^((?!slf4j|logback|picocli-4).)*\\.jar$")))) {
-			for (Path path : stream) {
-				if (!Files.isDirectory(path) && path.toString().endsWith(".jar")) {
-					Agent.addToClassPath(path.toFile());
-				}
-			}
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+		for (File file : Agent.files(getRootFolder(),1,"^((?!slf4j|logback|picocli-4).)*\\.jar$")) {
+			Agent.addToClassPath(file);
 		}
+
 	}
+
 	public static void premain(final String a, final Instrumentation inst) {
 		boot(a,inst);
 	}
@@ -195,6 +191,15 @@ public class Agent {
 			return new File(path);
 		}
 		throw new IllegalArgumentException("Invalid URL: " + url);
+	}
+
+	public static Set<File> files(String dir, int depth, String regexp) throws IOException {
+		try (Stream<Path> stream = Files.walk(Paths.get(dir), depth)) {
+			return stream
+					.filter(file -> !Files.isDirectory(file) && file.toString().matches(regexp))
+					.map(Path::toFile)
+					.collect(Collectors.toSet());
+		}
 	}
 
 }
